@@ -1,4 +1,4 @@
-# Image Defender — adversarial + perceptual image protection
+# Mist — adversarial + perceptual image protection
 
 Make images hard for common AI encoders to use while keeping them visually the same for humans.
 
