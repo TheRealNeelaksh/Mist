@@ -246,9 +246,11 @@ def main():
         )
 
     if args.do_watermark:
+        print("Embedding DCT watermark")
         cur = embed_dct_watermark(
             cur, key=args.key, alpha=args.alpha, jpeg_q=args.jpeg_q
         )
+        print("Watermark Embedded.")
 
     if args.fine_tune_steps > 0:
         cur = make_adversarial_clip(
