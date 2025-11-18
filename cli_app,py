@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+"""
+cli_app.py
+
+A simple interactive command-line interface for Mist2.
+Provides an easy menu to run:
+- full protection (adversarial + watermark)
+- watermark only
+- adversarial only
+- calibration (optional)
+"""
+
+import subprocess
+import shlex
+import argparse
+
+
+MENU = """
+Mist2 - Image Protection CLI
+----------------------------
+1) Full protect (Adversarial + Watermark)
+2) Watermark only
+3) Adversarial only
+4) Exit
+Choose an option: """
+
+
+def run_cmd(cmd):
+    print("\nRunning:", cmd)
+    proc = subprocess.Popen(
+        shlex.split(cmd),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True
+    )
+    for line in proc.stdout:
+        print(line, end="")
+    proc.wait()
+    print()
+    return proc.returncode
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--default_out",
+        default="outputs/protected.jpg",
+        help="Default output path"
+    )
+    args = parser.parse_args()
+
+    while True:
+        choice = input(MENU).strip()
+
+        # Full pipeline
+        if choice == "1":
+            inp = input("Input image path: ").strip()
+            out = input(f"Output path [{args.default_out}]: ").strip() or args.default_out
+            key = input("Watermark key [mykey]: ").strip() or "mykey"
+            eps = input("Adversarial eps [10]: ").strip() or "10"
+            steps = input("Adversarial steps [400]: ").strip() or "400"
+
+            cmd = (
+                f'python protect_image.py --input "{inp}" --out "{out}" '
+                f'--key "{key}" --do_adv --do_watermark '
+                f'--eps {eps} --steps {steps}'
+            )
+            run_cmd(cmd)
+
+        # Watermark only
+        elif choice == "2":
+            inp = input("Input image path: ").strip()
+            out = input("Output path [outputs/wm.jpg]: ").strip() or "outputs/wm.jpg"
+            key = input("Watermark key [mykey]: ").strip() or "mykey"
+            alpha = input("Watermark strength alpha [6.0]: ").strip() or "6.0"
+            q = input("JPEG quality [90]: ").strip() or "90"
+
+            cmd = (
+                f'python protect_image.py --input "{inp}" --out "{out}" '
+                f'--key "{key}" --do_watermark --alpha {alpha} --jpeg_q {q}'
+            )
+            run_cmd(cmd)
+
+        # Adversarial only
+        elif choice == "3":
+            inp = input("Input image path: ").strip()
+            out = input("Output path [outputs/adv.jpg]: ").strip() or "outputs/adv.jpg"
+            eps = input("Adversarial eps [10]: ").strip() or "10"
+            steps = input("Adversarial steps [400]: ").strip() or "400"
+
+            cmd = (
+                f'python protect_image.py --input "{inp}" --out "{out}" '
+                f'--do_adv --eps {eps} --steps {steps}'
+            )
+            run_cmd(cmd)
+
+        # Exit
+        elif choice == "4":
+            print("Goodbye.")
+            break
+
+        else:
+            print("Invalid choice. Try again.\n")
+
+
+if __name__ == "__main__":
+    main()
